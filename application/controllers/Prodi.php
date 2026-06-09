@@ -144,4 +144,24 @@ class Prodi extends CI_Controller {
 
         return TRUE;
     }
+
+    public function hapus($id)
+    {
+        $record = $this->ProdiModel->getById($id);
+        if ($record) {
+            $this->ProdiModel->delete($id);
+            $this->session->set_flashdata('swal', [
+                'icon'  => 'success',
+                'title' => 'Hapus Berhasil',
+                'text'  => 'Data program studi berhasil dihapus dari sistem.'
+            ]);
+        } else {
+            $this->session->set_flashdata('swal', [
+                'icon'  => 'error',
+                'title' => 'Gagal Hapus',
+                'text'  => 'Data prodi tidak ditemukan atau sudah hilang.'
+            ]);
+        }
+        redirect('prodi');
+    }
 }
