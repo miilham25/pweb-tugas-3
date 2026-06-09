@@ -81,7 +81,7 @@ class Fakultas extends CI_Controller {
             [
                 'required'   => 'Kolom {field} tidak boleh dikosongkan.',
                 'min_length' => 'Nama Fakultas minimal diisi dengan 3 karakter.',
-                'max_length' => 'Nama Fakultas maksimal diisi dengan 100 karakter.'
+                'max_length' => 'Nama Fakultas maksimal diisi dengan 1000 karakter.'
             ]
         );
 
@@ -121,5 +121,25 @@ class Fakultas extends CI_Controller {
         }
         
         return TRUE;
+    }
+
+    public function hapus($id)
+    {
+        $record = $this->FakultasModel->getById($id);
+        if ($record) {
+            $this->FakultasModel->delete($id);
+            $this->session->set_flashdata('swal', [
+                'icon'  => 'success',
+                'title' => 'Berhasil Dihapus',
+                'text'  => 'Data fakultas telah berhasil dihapus dari sistem.'
+            ]);
+        } else {
+            $this->session->set_flashdata('swal', [
+                'icon'  => 'error',
+                'title' => 'Gagal Menghapus',
+                'text'  => 'Data tidak ditemukan atau sudah dihapus sebelumnya.'
+            ]);
+        }
+        redirect('fakultas');
     }
 }
