@@ -72,4 +72,76 @@ class Prodi extends CI_Controller {
         $this->load->view('prodi/form', $data);
         $this->load->view('layout/footer');
     }
+
+    public function ubah($id)
+    {
+        $record = $this->ProdiModel->getById($id);
+        if (!$record) {
+            $this->session->set_flashdata('swal', [
+                'icon'  => 'warning',
+                'title' => 'Data Kosong',
+                'text'  => 'Target data program studi tidak ditemukan.'
+            ]);
+            redirect('prodi');
+        }
+
+        $this->form_validation->set_rules('fakultas_id', 'Fakultas', 'required', [
+            'required' => 'Kolom {field} naungan wajib ditentukan.'
+        ]);
+
+        $this->form_validation->set_rules(
+            'prodi_name', 
+            'Nama Prodi', 
+            'required|min_length[3]|max_length[100]|callback_check_nama_prodi_unik['.$id.']',
+            [
+                'required'   => 'Kolom {field} harus diisi.',
+                'min_length' => 'Nama Prodi minimal 3 karakter.',
+                'max_length' => 'Nama Prodi maksimal 100 karakter.'
+            ]
+        );
+
+        $this->form_validation->set_rules('prodi_strata', 'Strata', 'required', [
+            'required' => 'Pilih salah satu opsi jenjang {field}.'
+        ]);
+
+        if ($this->form_validation->run() === TRUE) {
+            $payload = [
+                'fakultas_id'  => $this->input->post('fakultas_id', true),
+                'prodi_name'   => $this->input->post('prodi_name', true),
+                'prodi_strata' => $this->input->post('prodi_strata', true)
+            ];
+
+            $this->ProdiModel->update($id, $payload);
+            $this->session->set_flashdata('swal', [
+                'icon'  => 'success',
+                'title' => 'Update Berhasil',
+                'text'  => 'Data program studi berhasil diperbarui.'
+            ]);
+            redirect('prodi');
+        }
+
+        $data['title'] = "Edit Data Program Studi";
+        $data['form_action'] = base_url('prodi/ubah/' . $id);
+        $data['submit_label'] = 'Update';
+        $data['fakultas_options'] = $this->FakultasModel->getAll();
+        $data['form_value'] = $record;
+
+        $this->load->view('layout/header', $data);
+        $this->load->view('prodi/form', $data);
+        $this->load->view('layout/footer');
+    }
+
+    public function check_nama_prodi_unik($prodi_name, $current_id)
+    {
+        $this->db->where('prodi_name', $prodi_name);
+        $this->db->where('prodi_id !=', $current_id);
+        $query = $this->db->get('prodi');
+
+        if ($query->num_rows() > 0) {
+            $this->form_validation->set_message('check_nama_prodi_unik', '{field} sudah terdaftar pada program studi lain.');
+            return FALSE;
+        }
+
+        return TRUE;
+    }
 }
